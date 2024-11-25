@@ -10,10 +10,7 @@ const CameraPage = () => {
   const [time, setTime] = useState<number>(300); // 5분 = 300초
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  if (time <= 0) {
-      document.querySelector('.timer-set')?.setAttribute('style', 'display: block');
-  }
+  const [isTimeUp, setIsTimeUp] = useState<boolean>(false);
 
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -27,6 +24,7 @@ const CameraPage = () => {
       setTime((prevTime) => {
         if (prevTime <= 1) {
           handleStopTimer();
+          setIsTimeUp(true);
           return 0;
         }
         return prevTime - 1;
@@ -60,7 +58,7 @@ const CameraPage = () => {
 
   return (
     <>
-      <div className="timer-set">
+      <div className="timer-set" style={{ display: isTimeUp ? 'block' : 'none' }}>
         <div className='timer-set-container'>
           <h2 className='timer-set-title'>검사가 종료되었습니다!</h2>
           <button className='timer-set-btn' onClick={() => navigate('/Result')}>결과 보기</button>
