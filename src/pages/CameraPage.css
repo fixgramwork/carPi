@@ -26,12 +26,51 @@
     flex: 1;
     max-width: 50%;
     padding: 10px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.camera-container img {
+.camera-container video {
     width: 100%;
     height: auto;
     object-fit: contain;
+    border-radius: 15px;
+    transition: opacity 0.3s ease;
+    opacity: 1;
+    display: block;
+}
+
+.camera-container.recording video {
+    opacity: 1;
+}
+
+.camera-overlay {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 15px;
+}
+
+.camera-overlay-text {
+    color: #FFF;
+    font-family: Pretendard;
+    font-size: 2vh;
+    letter-spacing: 0.5em;
+    font-weight: 'bold';
+}
+
+.camera-overlay.recording {
+    opacity: 0;
 }
 
 .text-container {
