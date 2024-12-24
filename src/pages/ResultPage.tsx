@@ -19,7 +19,7 @@ const Container = styled.div`
   background: white;
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); 
 `;
 
 const Title = styled.h1`
@@ -187,7 +187,7 @@ const ResultPage = () => {
         </GraphSection>
 
         <RestartButton onClick={() => navigate('/Camera')}>
-          다시 측정하기
+          다시 측정하기 {/*123*/}
         </RestartButton>
       </Container>
     </PageContainer>
