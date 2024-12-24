@@ -1,11 +1,137 @@
-import './ResultPage.css';
+import styled from 'styled-components';
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 interface RiskData {
-  time: string;  // 시간 정보 (예: "00:30")
-  risk: number;  // 위험도
+  time: string;
+  risk: number;
 }
+
+const PageContainer = styled.div`
+  min-height: 100vh;
+  background-color: #f2f2f7;
+  padding: 2rem;
+`;
+
+const Container = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+`;
+
+const Title = styled.h1`
+  color: #1c1c1e;
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+`;
+
+const RiskStatusSection = styled.div`
+  text-align: center;
+  margin-bottom: 3rem;
+`;
+
+const RiskCircle = styled.div<{ color: string }>`
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background-color: ${props => props.color};
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 1.5rem auto;
+  color: white;
+  opacity: 0.9;
+
+  span {
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+
+  p {
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+  }
+`;
+
+const GraphSection = styled.div`
+  margin-bottom: 3rem;
+`;
+
+const GraphTitle = styled.h3`
+  color: #1c1c1e;
+  margin-bottom: 1.5rem;
+  text-align: center;
+`;
+
+const RiskHistory = styled.div`
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 200px;
+  padding: 1rem;
+  background: #f2f2f7;
+  border-radius: 15px;
+`;
+
+const RiskItem = styled.div<{ height: string; color: string }>`
+  position: relative;
+  width: 30px;
+  height: ${props => props.height};
+  background-color: ${props => props.color};
+  border-radius: 5px;
+  transition: all 0.3s ease;
+
+  &:hover .risk-tooltip {
+    opacity: 1;
+  }
+`;
+
+const RiskTooltip = styled.span`
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.5rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+`;
+
+const TimeLabel = styled.span`
+  position: absolute;
+  bottom: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  color: #8e8e93;
+`;
+
+const RestartButton = styled.button`
+  width: 100%;
+  padding: 1rem;
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+  }
+`;
 
 const ResultPage = () => {
   const [riskLevel, setRiskLevel] = useState<number | null>(null);
@@ -30,55 +156,41 @@ const ResultPage = () => {
   };
 
   return (
-    <div className='result-page'>
-      <div className="result-container">
-        <h1>손목 터널 증후군 위험도 분석</h1>
+    <PageContainer>
+      <Container>
+        <Title>손목 터널 증후군 위험도 분석</Title>
         
-        <div className="risk-status-container">
-          <div className="risk-status">
-            <h3>현재 위험도</h3>
-            <div 
-              className="risk-circle"
-              style={{ 
-                backgroundColor: getRiskStatus(riskLevel || 0).color,
-                opacity: 0.8
-              }}
-            >
-              <span>{riskLevel}%</span>
-              <p>{getRiskStatus(riskLevel || 0).text}</p>
-            </div>
-          </div>
-        </div>
+        <RiskStatusSection>
+          <GraphTitle>현재 위험도</GraphTitle>
+          <RiskCircle color={getRiskStatus(riskLevel || 0).color}>
+            <span>{riskLevel}%</span>
+            <p>{getRiskStatus(riskLevel || 0).text}</p>
+          </RiskCircle>
+        </RiskStatusSection>
 
-        <div className="graph-container">
-          <h3>시간별 위험도 변화</h3>
-          <div className="risk-history">
+        <GraphSection>
+          <GraphTitle>시간별 위험도 변화</GraphTitle>
+          <RiskHistory>
             {riskHistory.map((data, index) => (
-              <div 
-                key={index} 
-                className="risk-item" 
-                style={{
-                  height: `${data.risk}%`,
-                  backgroundColor: getRiskStatus(data.risk).color
-                }}
+              <RiskItem 
+                key={index}
+                height={`${data.risk}%`}
+                color={getRiskStatus(data.risk).color}
               >
-                <span className="risk-tooltip">
+                <RiskTooltip>
                   {data.time}<br/>{data.risk}%
-                </span>
-                <span className="time-label">{data.time}</span>
-              </div>
+                </RiskTooltip>
+                <TimeLabel>{data.time}</TimeLabel>
+              </RiskItem>
             ))}
-          </div>
-        </div>
+          </RiskHistory>
+        </GraphSection>
 
-        <button 
-          className="restart-button"
-          onClick={() => navigate('/Camera')}
-        >
+        <RestartButton onClick={() => navigate('/Camera')}>
           다시 측정하기
-        </button>
-      </div>
-    </div>
+        </RestartButton>
+      </Container>
+    </PageContainer>
   );
 };
 

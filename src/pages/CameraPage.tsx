@@ -1,7 +1,121 @@
-import './CameraPage.css';
-import { getRandomQuote } from '../utils/randomQuote';
+import styled from 'styled-components';
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getRandomQuote } from '../utils/randomQuote';
+
+const Container = styled.div`
+  min-height: calc(100vh - 60px);
+  padding: 2rem;
+  position: relative;
+`;
+
+const GlassCard = styled.div`
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  z-index: 2;
+`;
+
+const CameraSection = styled.div<{ isRecording: boolean }>`
+  position: relative;
+  background: #000;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: ${props => props.isRecording ? '4px solid #FF3B30' : 'none'};
+  aspect-ratio: 16/9;
+`;
+
+const Video = styled.video`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+const InfoSection = styled.div`
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+
+const TimerDisplay = styled.div`
+  font-size: 3.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #007AFF, #00C6FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+`;
+
+const QuoteContainer = styled.div`
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 15px;
+  font-style: italic;
+  color: #666;
+  text-align: center;
+  margin: 1rem 0;
+`;
+
+const ActionButton = styled.button<{ isRecording?: boolean }>`
+  background: ${props => props.isRecording ? 
+    'linear-gradient(135deg, #FF3B30, #FF9500)' : 
+    'linear-gradient(135deg, #007AFF, #00C6FF)'};
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+`;
+
+const CompletionOverlay = styled.div<{ show: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  display: ${props => props.show ? 'flex' : 'none'};
+  justify-content: center;
+  align-items: center;
+`;
+
+const CompletionCard = styled.div`
+  background: white;
+  padding: 3rem;
+  border-radius: 30px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #007AFF, #00C6FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+`;
 
 const CameraPage = () => {
   const navigate = useNavigate();
@@ -147,54 +261,43 @@ const CameraPage = () => {
   }, []);
 
   return (
-    <>
-      <div className="timer-set">
-        <div className='timer-set-container'>
-          <h2 className='timer-set-title'>검사가 종료되었습니다!</h2>
-          <button className='timer-set-btn' onClick={() => navigate('/Result')}>결과 보기</button>
-        </div>
-      </div>
-      <div className='camera-page'>
-        <div className='container'>
-          <div className={`camera-container ${isRunning ? 'recording' : ''}`}>
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-            />
-            <div className={`camera-overlay ${isRunning ? 'recording' : ''}`}>
-              <span className='camera-overlay-text'>촬영 시작을 눌러주세요</span>
-            </div>
-          </div>
-          <div className='text-container'>
-            <div className='timer-container'>
-              <h4 className='timer-title'>남은 시간</h4>
-              <div className='timer-time'>{formatTime(time)}</div>
-              <div className='quote-container'>
-                <p className='quote-text'>
-                  {randomQuote?.text || '명언을 불러오는 중...'}
-                </p>
-              </div>
-              <div 
-                className='timer-button' 
-                onClick={handleStartTimer}
-                style={{ display: isRunning ? 'none' : 'flex' }}
-              >
-                촬영 시작
-              </div>
-              <div 
-                className='timer-button'
-                onClick={handleStopTimer}
-                style={{ display: isRunning ? 'flex' : 'none' }}
-              >
-                촬영 중지
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
+    <Container>
+      <CompletionOverlay show={time <= 0}>
+        <CompletionCard>
+          <h2>검사가 종료되었습니다!</h2>
+          <ActionButton onClick={() => navigate('/Result')}>
+            결과 보기
+          </ActionButton>
+        </CompletionCard>
+      </CompletionOverlay>
+
+      <GlassCard>
+        <CameraSection isRecording={isRunning}>
+          <Video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+          />
+        </CameraSection>
+
+        <InfoSection>
+          <TimerDisplay>{formatTime(time)}</TimerDisplay>
+          <QuoteContainer>
+            {randomQuote?.text || '명언을 불러오는 중...'}
+          </QuoteContainer>
+          {isRunning ? (
+            <ActionButton isRecording onClick={handleStopTimer}>
+              촬영 중지
+            </ActionButton>
+          ) : (
+            <ActionButton onClick={handleStartTimer}>
+              촬영 시작
+            </ActionButton>
+          )}
+        </InfoSection>
+      </GlassCard>
+    </Container>
   );
 };
 
